@@ -1,12 +1,20 @@
 package com.xbaimiao.minecraft.web.util
 
+import java.awt.image.BufferedImage
 import java.io.*
-import java.net.*
+import java.net.URL
+import javax.imageio.ImageIO
+
+fun BufferedImage.toByteArray(): ByteArray {
+    val out = ByteArrayOutputStream()
+    ImageIO.write(this, "png", out)
+    return out.toByteArray()
+}
 
 /**
  * 将文件转换成byte数组
  */
-fun File.toByteArray():ByteArray{
+fun File.toByteArray(): ByteArray {
     val fis = FileInputStream(this)
     val bos = ByteArrayOutputStream()
     val b = ByteArray(1024)
@@ -50,39 +58,3 @@ fun main() {
     println(data)
 }
 
-fun URL.encodeUrl(): URL {
-    val u = this.punyUrl()
-    return try {
-        var urlS = u.toExternalForm()
-        urlS = urlS.replace(" ", "%20")
-        val uri = URI(urlS)
-        URL(uri.toASCIIString())
-    } catch (e: URISyntaxException) {
-        u
-    } catch (e: MalformedURLException) {
-        u
-    }
-}
-
-fun URL.punyUrl(): URL {
-    var url = this
-    if (!url.host.isAscii()) {
-        url = try {
-            val puny = IDN.toASCII(url.host)
-            URL(url.protocol, puny, url.port, url.file)
-        } catch (e: MalformedURLException) {
-            throw IllegalArgumentException(e)
-        }
-    }
-    return url
-}
-
-fun String.isAscii(): Boolean {
-    for (i in 0 until this.length) {
-        val c = this[i].code
-        if (c > 127) { // ascii range
-            return false
-        }
-    }
-    return true
-}

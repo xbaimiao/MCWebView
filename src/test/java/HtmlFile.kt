@@ -13,7 +13,7 @@ class HtmlFile(path: String) : File(path) {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            val file = HtmlFile("E:\\Intellij IDEA\\web\\ktor-sample\\src\\main\\resources\\templates\\index.ftl")
+            val file = HtmlFile("E:\\Intellij IDEA\\web\\ktor-sample\\src\\main\\resources\\templates\\index.html")
             file.eval(hashMapOf("d" to file))
         }
 

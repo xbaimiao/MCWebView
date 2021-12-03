@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
+import java.awt.image.BufferedImage
 import java.io.File
 
 /**
@@ -14,12 +15,42 @@ import java.io.File
  */
 open class Handler(val context: ChannelHandlerContext, val request: FullHttpRequest) {
 
-    fun respondFile(file: File) {
+    private fun respondFile(file: File, string: String) {
         val response = DefaultFullHttpResponse(
             HttpVersion.HTTP_1_1,
             HttpResponseStatus.OK, Unpooled.wrappedBuffer(file.toByteArray())
         )
-        response.headers()["Content-Type"] = "application/x-msdownload;charset=UTF-8"
+        response.headers()["Content-Type"] = "$string;charset=UTF-8"
+        response.headers()["Content-Length"] = response.content().readableBytes()
+        context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
+    }
+
+    fun respondFile(file: File) {
+        respondFile(file, "application/x-msdownload")
+    }
+
+    fun respondMp4(file: File) {
+        respondFile(file, "video/mpeg4")
+    }
+
+    fun respondMp3(file: File) {
+        respondFile(file, "audio/mp3")
+    }
+
+    fun respondCss(file: File) {
+        respondFile(file, "text/css")
+    }
+
+    fun respondJs(file: File) {
+        respondFile(file, "application/x-javascript")
+    }
+
+    fun respondImage(image: BufferedImage) {
+        val response = DefaultFullHttpResponse(
+            HttpVersion.HTTP_1_1,
+            HttpResponseStatus.OK, Unpooled.wrappedBuffer(image.toByteArray())
+        )
+        response.headers()["Content-Type"] = "image/png;charset=UTF-8"
         response.headers()["Content-Length"] = response.content().readableBytes()
         context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
     }

@@ -36,6 +36,10 @@ class NettyHttpServer(inetPort: Int, block: NettyHttpServer.() -> Unit = {}) {
 
     fun html(filename: String): HtmlFile = HtmlFile(htmlPrefix + filename)
 
+    fun handler(block: NettyHttpServer.() -> Unit) {
+        block.invoke(this)
+    }
+
     init {
         parentGroup = NioEventLoopGroup()
         childGroup = NioEventLoopGroup()

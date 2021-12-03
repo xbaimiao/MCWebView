@@ -15,8 +15,7 @@ object Reflex {
         }
     }
 
-    @JvmName("getProperty1")
-    fun <T> Any.getProperty(path: String): T {
+    fun <T> Any.getPropertyT(path: String): T {
         return try {
             this::class.java.getDeclaredField(path).get(this) as T
         } catch (e: Exception) {

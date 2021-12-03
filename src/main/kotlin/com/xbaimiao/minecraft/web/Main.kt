@@ -8,6 +8,8 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.SecuredFile
 import taboolib.platform.BukkitPlugin
 import java.io.File
+import java.net.URL
+import javax.imageio.ImageIO
 
 object Main : Plugin() {
 
@@ -27,10 +29,10 @@ object Main : Plugin() {
                 installStatic(plugin.dataFolder.path)
                 get("/test") {
                     println(this.getGetParamsFromChannel().toString())
-                    responseText("你妈死了")
+                    respondImage(ImageIO.read(URL("http://127.0.0.1:8080/favicon.png")))
                 }
                 get("/index") {
-                    respondHtml(html("index.ftl"), mapOf("config" to com.xbaimiao.minecraft.web.util.Config))
+                    respondHtml(html("index.html"), mapOf("config" to com.xbaimiao.minecraft.web.util.Config))
                 }
                 get("/favicon.png") {
                     respondImage(newFile(plugin.dataFolder, "favicon.png"), ImageType.PNG)
