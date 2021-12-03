@@ -12,7 +12,7 @@ import io.netty.handler.codec.http.QueryStringDecoder
  */
 class GetHandler(context: ChannelHandlerContext, request: FullHttpRequest) : Handler(context, request) {
 
-    fun getGetParamsFromChannel(): Map<String, Any> {
+    private fun getGetParamsFromChannel(): Map<String, Any> {
         val params: MutableMap<String, Any> = HashMap()
         if (request.method() === HttpMethod.GET) {
             val decoder = QueryStringDecoder(request.uri())
@@ -24,5 +24,7 @@ class GetHandler(context: ChannelHandlerContext, request: FullHttpRequest) : Han
         }
         return params
     }
+
+    val params = this.getGetParamsFromChannel()
 
 }

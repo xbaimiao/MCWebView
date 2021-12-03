@@ -16,7 +16,9 @@ import io.netty.util.internal.StringUtil
  */
 class PostHandler(context: ChannelHandlerContext, request: FullHttpRequest) : Handler(context, request) {
 
-    fun getPostParamsFromChannel(): Map<String, Any> {
+    val params = getPostParamsFromChannel()
+
+    private fun getPostParamsFromChannel(): Map<String, Any> {
         var params: Map<String, Any> = HashMap()
         if (request.method() === HttpMethod.POST) {
             // 处理post 请求
