@@ -1,7 +1,7 @@
 package com.xbaimiao.minecraft.web.netty.handler
 
 import com.xbaimiao.minecraft.web.netty.html.HtmlFile
-import com.xbaimiao.minecraft.web.util.toByteArray
+import com.xbaimiao.minecraft.web.util.Fun.toByteArray
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
