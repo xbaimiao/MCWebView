@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
 import java.awt.image.BufferedImage
 import java.io.File
+import java.net.InetSocketAddress
 
 /**
  * @Author xbaimiao
@@ -15,7 +16,51 @@ import java.io.File
  */
 open class Handler(val context: ChannelHandlerContext, val request: FullHttpRequest) {
 
-    private fun respondFile(file: File, string: String) {
+    companion object {
+        private val sessions = HashMap<String, HashMap<String, Any>>()
+
+        init {
+            Thread {
+                while (true) {
+                    Thread.sleep(1000 * 60 * 60 * 24)
+                    sessions.clear()
+                }
+            }.start()
+        }
+
+    }
+
+    init {
+        val cookie = getCookie()
+        if (cookie != null) {
+            if (!sessions.containsKey(cookie)) {
+                sessions[cookie] = HashMap()
+            }
+        } else {
+            if (!sessions.containsKey(getIpSocket().address.hostAddress)) {
+                sessions[getIpSocket().address.hostAddress] = HashMap()
+            }
+        }
+    }
+
+    fun getSession(): HashMap<String, Any> {
+        val cookie = getCookie()
+        return if (cookie != null) {
+            sessions[cookie]!!
+        } else {
+            sessions[getIpSocket().address.hostAddress]!!
+        }
+    }
+
+    fun getIpSocket(): InetSocketAddress {
+        return context.channel().remoteAddress() as InetSocketAddress
+    }
+
+    fun getCookie(): String? {
+        return request.headers()["Cookie"]
+    }
+
+    fun respondFile(file: File, string: String) {
         val response = DefaultFullHttpResponse(
             HttpVersion.HTTP_1_1,
             HttpResponseStatus.OK, Unpooled.wrappedBuffer(file.toByteArray())
@@ -27,6 +72,10 @@ open class Handler(val context: ChannelHandlerContext, val request: FullHttpRequ
 
     fun respondFile(file: File) {
         respondFile(file, "application/x-msdownload")
+    }
+
+    fun respondHtml(file: File) {
+        respondFile(file, "text/html")
     }
 
     fun respondMp4(file: File) {

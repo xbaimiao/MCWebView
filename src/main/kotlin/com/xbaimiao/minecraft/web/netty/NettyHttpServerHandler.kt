@@ -14,32 +14,55 @@ class NettyHttpServerHandler(private val server: NettyHttpServer) : SimpleChanne
 
     override fun channelRead0(channelHandlerContext: ChannelHandlerContext, fullHttpRequest: FullHttpRequest) {
         val uri = fullHttpRequest.uri() ?: return
-
         if (fullHttpRequest.method() == HttpMethod.GET) {
+            if (server.debug) {
+                println("GET -> url:$uri")
+            }
             for (mutableEntry in server.getMap) {
-                if (uri.startsWith(mutableEntry.key)) {
-                    mutableEntry.value.invoke(GetHandler(channelHandlerContext, fullHttpRequest))
-                    return
+                if (uri.contains("?")) {
+                    if (uri.split("?")[0] == mutableEntry.key) {
+                        mutableEntry.value.invoke(GetHandler(channelHandlerContext, fullHttpRequest))
+                        return
+                    }
+                } else {
+                    if (uri == mutableEntry.key) {
+                        mutableEntry.value.invoke(GetHandler(channelHandlerContext, fullHttpRequest))
+                        return
+                    }
                 }
             }
         } else {
+            if (server.debug) {
+                println("POST -> url:$uri")
+            }
             for (mutableEntry in server.postMap) {
-                if (uri.startsWith(mutableEntry.key)) {
-                    mutableEntry.value.invoke(PostHandler(channelHandlerContext, fullHttpRequest))
-                    return
+                if (uri.contains("?")) {
+                    if (uri.split("?")[0] == mutableEntry.key) {
+                        mutableEntry.value.invoke(PostHandler(channelHandlerContext, fullHttpRequest))
+                        return
+                    }
+                } else {
+                    if (uri == mutableEntry.key) {
+                        mutableEntry.value.invoke(PostHandler(channelHandlerContext, fullHttpRequest))
+                        return
+                    }
                 }
             }
+        }
+        if (server.debug) {
+            println("static res")
         }
         val handler = Handler(
             channelHandlerContext,
             fullHttpRequest
         )
-        val file = File("${server.static}${File.separator}${uri.substring(1)}")
+        val filePath = "${server.static}${File.separator}${uri.substring(1)}".split("?")[0]
+        val file = File(filePath)
         if (!file.exists()) {
             handler.responseText("${file.name} Not Fount")
             return
         }
-        when (uri.substring(uri.length - 3).lowercase()) {
+        when (filePath.substring(filePath.length - 3).lowercase()) {
             "png" -> handler.respondImage(file, ImageType.PNG)
             "jpg" -> handler.respondImage(file, ImageType.JPG)
             "gif" -> handler.respondImage(file, ImageType.GIF)
@@ -47,6 +70,8 @@ class NettyHttpServerHandler(private val server: NettyHttpServer) : SimpleChanne
             ".js" -> handler.respondJs(file)
             "mp3" -> handler.respondMp3(file)
             "mp4" -> handler.respondMp4(file)
+            "tml" -> handler.respondHtml(file)
+            "svg" -> handler.respondFile(file, "text/xml")
         }
         handler.respondFile(file)
     }

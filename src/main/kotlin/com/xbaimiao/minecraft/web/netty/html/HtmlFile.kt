@@ -1,6 +1,5 @@
 package com.xbaimiao.minecraft.web.netty.html
 
-import com.xbaimiao.minecraft.web.util.Config
 import com.xbaimiao.minecraft.web.util.Reflex.getProperty
 import java.io.BufferedReader
 import java.io.File

@@ -15,13 +15,14 @@ import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpRequestDecoder
 import io.netty.handler.codec.http.HttpResponseEncoder
 
-class NettyHttpServer(inetPort: Int, block: NettyHttpServer.() -> Unit = {}) {
+class NettyHttpServer(inetPort: Int, var debug: Boolean = false, block: NettyHttpServer.() -> Unit = {}) {
 
     private val parentGroup: EventLoopGroup
     private val childGroup: EventLoopGroup
     private val server: ServerBootstrap
     private val future: ChannelFuture
     private var htmlPrefix = ""
+    private val handlers = ArrayList<NettyHttpServer.() -> Unit>()
     var static = ""
     val getMap = HashMap<String, GetHandler.() -> Unit>()
     val postMap = HashMap<String, PostHandler.() -> Unit>()
@@ -37,7 +38,17 @@ class NettyHttpServer(inetPort: Int, block: NettyHttpServer.() -> Unit = {}) {
     fun html(filename: String): HtmlFile = HtmlFile(htmlPrefix + filename)
 
     fun handler(block: NettyHttpServer.() -> Unit) {
-        block.invoke(this)
+        handlers.add(block)
+    }
+
+    fun join() {
+        //这是一个阻塞方法
+        future.channel().closeFuture().sync()
+    }
+
+    fun stop() {
+        childGroup.shutdownGracefully()
+        parentGroup.shutdownGracefully()
     }
 
     init {
@@ -71,8 +82,8 @@ class NettyHttpServer(inetPort: Int, block: NettyHttpServer.() -> Unit = {}) {
             server.option(TCP_NODELAY, true)
             future = server.bind(inetPort).sync()
             block.invoke(this)
-            // 当通道关闭时继续向后执行，这是一个阻塞方法
-            future.channel().closeFuture().sync()
+            handlers.forEach { it.invoke(this) }
+            join()
         } finally {
             childGroup.shutdownGracefully()
             parentGroup.shutdownGracefully()

@@ -6,14 +6,14 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven("https://www.xbaimiao.com/repository/maven-releases/")
+    maven("https://repo.xbaimiao.com/nexus/content/repositories/releases/")
 }
 java {
     withSourcesJar()
 }
 
 dependencies {
-    compileOnly("paper:paper:1.16.5")
+    compileOnly("io.netty:netty-all:4.1.66.Final")
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))
 }
@@ -29,7 +29,7 @@ configure<JavaPluginConvention> {
 
 publishing {
     repositories {
-        maven("https://www.xbaimiao.com/repository/maven-releases/") {
+        maven("https://repo.xbaimiao.com/nexus/content/repositories/releases/") {
             credentials {
                 username = project.findProperty("user").toString()
                 password = project.findProperty("password").toString()
